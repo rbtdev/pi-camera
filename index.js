@@ -1,4 +1,5 @@
 var ioClient = require('socket.io-client');
+var env = require('./config');
 
 
 function PiCam (name) {
@@ -10,7 +11,7 @@ function PiCam (name) {
 
 PiCam.prototype.connect = function () {
 	var _this = this;
-	this.socket = ioClient.connect("https://pi-control.herokuapp.com/camera");
+	this.socket = ioClient.connect(env.CAMERA_CONTOLLER_ENDPOINT);
 	this.socket.on('connect', onConnect.bind(this))
 }
 
