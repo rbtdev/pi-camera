@@ -11,7 +11,8 @@ function PiCam (name) {
 
 PiCam.prototype.connect = function () {
 	var _this = this;
-	this.socket = ioClient.connect(env.CAMERA_CONTOLLER_ENDPOINT);
+	console.log("Connecting to " + env.CAMERA_CONTROLLER_ENDPOINT);
+	this.socket = ioClient.connect(env.CAMERA_CONTROLLER_ENDPOINT);
 	this.socket.on('connect', onConnect.bind(this))
 }
 
