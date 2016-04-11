@@ -1,12 +1,12 @@
 var ioClient = require('socket.io-client');
 var env = require('./config');
 
+function PiCam (name, id) {
 
-function PiCam (name) {
-
-	this.active = false;
+	this.status = 'disabled';
 	this.socket = null;
 	this.name = name;
+	this.id = id;
 }
 
 PiCam.prototype.connect = function () {
@@ -20,31 +20,26 @@ function onConnect () {
 	this.socket.on('activate', onActivate.bind(this));
 	this.socket.on('deactivate', onDeactivate.bind(this));
 	console.log("Camera connected, registering " + this.name);
-	this.socket.emit('register', {name: this.name})
-	this.socket.emit('status', {active: this.active});	
+	this.socket.emit('register', {name: this.name, id:this.id})
+	this.socket.emit('status', {status: this.status});	
 }
 function onActivate () {
 	console.log("PiSim: Turning motion detection system on");
 	// do all the stuff to enable motion detection
-	this.active = true
-	this.socket.emit('status', {active: this.active});
+	this.status = 'active';
+	this.socket.emit('status', {status: this.status});
 }
 
 function onDeactivate () {
 	console.log("PiSim: Turning motion detection system off");
 	// disable motion detection
-	this.active = false;
-	this.socket.emit('status', {active: this.active});
+	this.status = 'disabled';
+	this.socket.emit('status', {status: this.status});
 }
 
 PiCam.prototype.sendImage = function (src) {
 	this.socket.emit('image', {src: src})
 }
 
-var piCam = new PiCam("My Pi")
+var piCam = new PiCam(env.NAME, env.GUID)
 piCam.connect();
-
-setTimeout(function () {
-	console.log("Sending image...");
-	piCam.sendImage("https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSrYrONHmEvJE7F7sdXoJRhivju1dYYQ9UeZFgz4Ekee8HTrpLvSs939LM");
-}, 10000)
