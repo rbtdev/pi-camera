@@ -37,5 +37,14 @@ function onDeactivate () {
 	this.socket.emit('status', {active: this.active});
 }
 
+PiCam.prototype.sendImage = function (src) {
+	this.socket.emit('image', {src: src})
+}
 
-new PiCam("My Pi").connect();
+var piCam = new PiCam("My Pi")
+piCam.connect();
+
+setTimeout(function () {
+	console.log("Sending image...");
+	piCam.sendImage("https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSrYrONHmEvJE7F7sdXoJRhivju1dYYQ9UeZFgz4Ekee8HTrpLvSs939LM");
+}, 10000)
