@@ -31,7 +31,7 @@ function onConnect () {
 
 function onMotion () {
 	console.log("Motion detected by sensor. Sending motion event to cloud");
-	this.socket.emit('motion');
+	this.socket.emit("alarm", {type: "motion", timestamp: new Date()});
 };
 
 function onImage (imagePath) {
