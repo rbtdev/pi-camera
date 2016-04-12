@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "moment": "^2.12.0",
     "node-aplay": "^1.0.3",
     "raspicam": "^0.2.13",
     "rpi-gpio": "^0.7.0",

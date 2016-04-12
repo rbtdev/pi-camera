@@ -1,6 +1,8 @@
 var gpio = require('rpi-gpio')
 const EventEmitter = require('events');
 var env = require('../config');
+var moment = require('moment');
+var fs = require('fs');
 var RaspiCam = null;
 if (env.PRODUCTION) {
 	var RaspiCam = require("raspicam");
@@ -28,9 +30,12 @@ PiCam.prototype.deactivate = function (callback) {
 
 PiCam.prototype.startCamera = function (sendImage) {
 	// simulate image taken after 5 seconds
+	console.log("Image dir = " + imageDir)
 	if (RaspiCam) {
 		console.log("Using RaspiCam");
-		var imageDir = __dirname + "/images/";
+		var dtg = moment().format('YYYYMMDDhhss');
+		var imageDir = __dirname + "/images/capture/" + dtg + "/";
+		fs.mkdirSync(imageDir);
 		var fileName = "capture_%d.jpg"
 		var filePath = imageDir + fileName;
 		var cameraOptions  = {
