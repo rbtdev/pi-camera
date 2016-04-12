@@ -20,16 +20,20 @@ PiCam.prototype.deactivate = function (callback) {
 	if (callback) callback(err);
 }
 
-
+PiCam.prototype.startCamera = function (cb) {
+	// simulate image taken after 5 seconds
+	setTimeout( function () {
+		cb(__dirname + "/images/pi_logo.png");
+	}, 5000);
+};
 
 
 var piCam = new PiCam();
 setInterval(function () {
 	if (piCam.active) {
-		console.log("Simulating motion detection and image generation");
+		console.log("Simulating motion detection");
 		piCam.emit('motion');
-		piCam.emit('image',__dirname + "/images/pi_logo.png");
 	}
-},10000)
+},10*1000)
 
 module.exports = piCam;

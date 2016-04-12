@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "node-aplay": "^1.0.3",
     "rpi-gpio": "^0.7.0",
     "socket.io-client": "^1.4.5",
     "socket.io-stream": "^0.9.0"
