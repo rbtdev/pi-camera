@@ -22,6 +22,7 @@ PiCam.prototype.deactivate = function (callback) {
 
 PiCam.prototype.startCamera = function (cb) {
 	// simulate image taken after 5 seconds
+	console.log("Starting image capture.");
 	setTimeout( function () {
 		cb(__dirname + "/images/pi_logo.png");
 	}, 5000);

@@ -45,19 +45,22 @@ function onMotion () {
 	// Activate camera
 	var _this = this;
 	this.sensor.startCamera(function (imagePath) {
-		_this.sendImage(imagePath);
-		_this.playAlarm();
+		_this.sendImage(imagePath, _this.playAlarm);
 	})
 };
 
 Controller.prototype.playAlarm = function () {
-	console.log("Alarm sound triggered. Play sound here");
+	console.log("Playing alarm sound");
 	alarm.play();
 }
 
-Controller.prototype.sendImage = function (imagePath) {
+Controller.prototype.sendImage = function (imagePath, cb) {
 	console.log("Image generated. Sending to cloud. Path = " + imagePath);
 	var stream = ioStream.createStream();
+	stream.on('finish', function () {
+		console.log("Image uploaded.")
+		cb();
+	});
 	ioStream(this.socket).emit('image', stream, {name:path.basename(imagePath)});
 	fs.createReadStream(imagePath).pipe(stream);
 };
