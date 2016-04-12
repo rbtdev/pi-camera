@@ -11,6 +11,8 @@ function Controller (name, id) {
 	this.name = name;
 	this.id = id;
 	this.sensor = require('./pi-cam');
+	this.sensor.on('motion', onMotion.bind(this));
+	this.sensor.on('image', onImage.bind(this));
 }
 
 Controller.prototype.connect = function () {
@@ -20,14 +22,21 @@ Controller.prototype.connect = function () {
 };
 
 function onConnect () {
-	this.sensor.on('motion', onMotion.bind(this));
-	this.sensor.on('image', onImage.bind(this));
 	this.socket.on('activate', onActivate.bind(this));
 	this.socket.on('deactivate', onDeactivate.bind(this));
+	this.socket.on('disconnect', onDisconnect.bind(this));
 	console.log("Camera connected, registering " + this.name);
 	this.socket.emit('register', {name: this.name, id:this.id})
 	this.socket.emit('status', {status: this.status});	
 };
+
+function onDisconnect() {
+	console.log("Controller disconnected. Clearing event listeners.");
+	this.socket.removeAllListeners("activate");
+	this.socket.removeAllListeners('activate');
+	this.socket.removeAllListeners('deactivate');
+	this.socket.removeAllListeners('disconnect');
+}
 
 function onMotion () {
 	console.log("Motion detected by sensor. Sending motion event to cloud");
