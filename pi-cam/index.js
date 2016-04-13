@@ -42,8 +42,9 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		var cameraOptions  = {
 			mode: "timelapse",
 			output: filePath,
-			tl: 250,
+			tl: 100,
 			rot: 180,
+			t: 10
 		}
 		var camera = new RaspiCam(cameraOptions);
 		var preview = null;

@@ -44,7 +44,7 @@ function onDisconnect() {
 
 function onMotion () {
 	console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
-	var timestamp = moment().format("YYYYMMDDhhmmss");
+	var timestamp = moment().format("YYYYMMDDHHmmss");
 	this.socket.emit("alarm", {type: "motion", timestamp: timestamp});
 	// Activate camera
 	var _this = this;
