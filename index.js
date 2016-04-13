@@ -15,8 +15,8 @@ function Controller (name, id) {
 	this.id = id;
 	this.sensor = require('./pi-cam');
 	this.sensor.on('motion', onMotion.bind(this));
-	this.sensor.on('timelapse', onTimelapse.bind(this));
 	this.sensor.on('thumbnail', onImage.bind(this));
+	this.sensor.on('timelapse', onTimelapse.bind(this));
 }
 
 Controller.prototype.connect = function () {
@@ -92,11 +92,16 @@ function onTimelapse(data) {
 	fs.readdir(imageDir, function (err, files) {
 		if (err) return console.log("Err reading image dir " + err);
 		console.log("files found: " + files);
+		var filecount = files.length;
 		files.forEach(function (fileName) {
 			var imagePath = imageDir + "/" + fileName;
 			sendFile(_this.socket, 'frame', data.timestamp, imagePath, function (err) {
+				filecount++;
 				if (err) return console.log("Error uploading frame: " + err);
 				console.log("Frame " + fileName + " uploaded.");
+				if (filecount >= files.length) {
+					_this.socket.emit('mjpeg', data.timestamp);
+				}
 			});
 		});
 	});
