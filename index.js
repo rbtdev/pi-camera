@@ -2,6 +2,7 @@ var ioClient = require('socket.io-client');
 var ioStream = require('socket.io-stream');
 var env = require('./config');
 var fs = require('fs');
+var moment = require('moment');
 var path = require('path');
 var Sound = require('node-aplay');
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
@@ -41,12 +42,14 @@ function onDisconnect() {
 
 function onMotion () {
 	console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
-	this.socket.emit("alarm", {type: "motion", timestamp: new Date()});
+	var timestamp = moment().format("YYYYMMDDhhmmss");
+	this.socket.emit("alarm", {type: "motion", timestamp: timestamp});
 	// Activate camera
 	var _this = this;
-	this.sensor.startCamera(function (imagePath) {
-		_this.sendImage(imagePath, _this.playAlarm);
+	this.sensor.startCamera(timestamp, function (imagePath) {
+		_this.sendImage(timestamp, imagePath);
 	})
+	this.playAlarm();
 };
 
 Controller.prototype.playAlarm = function () {
@@ -54,14 +57,13 @@ Controller.prototype.playAlarm = function () {
 	alarm.play();
 }
 
-Controller.prototype.sendImage = function (imagePath, cb) {
+Controller.prototype.sendImage = function (timestamp, imagePath) {
 	console.log("Image generated. Sending to cloud. Path = " + imagePath);
 	var stream = ioStream.createStream();
 	stream.on('finish', function () {
-		console.log("Image uploaded.")
-		cb();
+		console.log("Image uploaded.");
 	});
-	ioStream(this.socket).emit('image', stream, {name:path.basename(imagePath)});
+	ioStream(this.socket).emit('image', stream, {timestamp: timestamp, name:path.basename(imagePath)});
 	fs.createReadStream(imagePath).pipe(stream);
 };
 

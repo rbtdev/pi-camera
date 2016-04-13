@@ -28,16 +28,16 @@ PiCam.prototype.deactivate = function (callback) {
 	if (callback) callback(err);
 }
 
-PiCam.prototype.startCamera = function (sendImage) {
+PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	// simulate image taken after 5 seconds
+	var imageDir = __dirname + "/images/capture/" + timestamp + "/";
+	fs.mkdirSync(imageDir);
+	var fileName = "capture_%d.jpg"
+	var filePath = imageDir + fileName;
 	console.log("Image dir = " + imageDir)
 	if (RaspiCam) {
 		console.log("Using RaspiCam");
-		var dtg = moment().format('YYYYMMDDhhss');
-		var imageDir = __dirname + "/images/capture/" + dtg + "/";
-		fs.mkdirSync(imageDir);
-		var fileName = "capture_%d.jpg"
-		var filePath = imageDir + fileName;
+
 		var cameraOptions  = {
 			mode: "timelapse",
 			tl: 250,
@@ -59,8 +59,16 @@ PiCam.prototype.startCamera = function (sendImage) {
 		camera.start();
 	}
 	else {
-		console.log("Sending test image.");
-		sendImage(__dirname + "/images/pi_logo.png");
+		console.log("Sending test images.");
+		var count = 0;
+		_sendImage();
+		function _sendImage() {
+			sendImage(__dirname + "/images/pi_logo.png");
+			count++;
+			if (count < 5) {
+				setTimeout(_sendImage, 100);
+			}
+		}
 	}
 };
 
@@ -71,6 +79,6 @@ setInterval(function () {
 		console.log("Simulating motion detection");
 		piCam.emit('motion');
 	}
-},10*1000)
+},30*1000)
 
 module.exports = piCam;
