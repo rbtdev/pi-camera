@@ -57,20 +57,26 @@ Controller.prototype.playAlarm = function () {
 	alarm.play();
 }
 
-function onImage(data) {
-	var timestamp = data.timestamp;
-	var imagePath = data.imagePath
-	console.log("Image generated. Sending to cloud. Path = " + imagePath);
-	var stream = ioStream.createStream();
-	stream.on('finish', function () {
-		console.log("Image uploaded.");
+function sendFile(socket, event, timestamp, filePath, cb) {
+	var fileName = path.basename(filePath);
+	var fsStream = fs.createReadStream(filePath);
+	fsStream.on('error', cb);
+	fsStream.on('readable', function () {
+		var stream = ioStream.createStream();
+		stream.on('finish', cb);
+		fsStream.pipe(stream);
+		ioStream(socket).emit(event, stream, {timestamp: timestamp, name:fileName});
 	});
-	ioStream(this.socket).emit('thumbnail', stream, {timestamp: timestamp, name:path.basename(imagePath)});
-	fs.createReadStream(imagePath).pipe(stream);
+}
+
+function onImage(data) {
+	sendFile(this.socket, 'thumbnail', data.timestamp, data.imagePath, function (err) {
+		if (err) return console.log("Error uploading file: " + err);
+		console.log("Thumbnail uploaded.");
+	});
 }
 
 function onTimelapse(data) {
-	var timestamp = data.timestamp;
 	var imageDir = data.imageDir;
 	var _this = this;
 	console.log("Timlapse frames completed in " + imageDir);
@@ -79,17 +85,11 @@ function onTimelapse(data) {
 		console.log("files found: " + files);
 		files.forEach(function (fileName) {
 			var imagePath = imageDir + "/" + fileName;
-			console.log("Sending " + imagePath)
-			var fsStream = fs.createReadStream(imagePath);
-			fsStream.on('error', function (error) {console.log("Cant open file " + fileName, error);});
-			fsStream.on('readable', function () {
-				var stream = ioStream.createStream();
-				stream.on('finish', function () {console.log("Frame uploaded.");});
-				fsStream.pipe(stream);
-				ioStream(_this.socket).emit('frame', stream, {timestamp: timestamp, name:fileName});
+			sendFile(_this.socket, 'frame', data.timestamp, imagePath, function (err) {
+				if (err) return console.log("Error uploading frame: " + err);
+				console.log("Frame " + fileName + " uploaded.");
 			});
-			
-		})
+		});
 	});
 }
 
