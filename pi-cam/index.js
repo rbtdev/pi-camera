@@ -47,7 +47,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		}
 		var camera = new RaspiCam(cameraOptions);
 		var preview = null;
-		camera.on("read", function(err, timestamp, filename){ 
+		camera.on("read", function(err, imageTime, filename){ 
 			if (err) console.log("ERROR-" + err);
 			console.log("filename = " + filename);
 			if (filename.indexOf('~') < 0 && !preview) {
