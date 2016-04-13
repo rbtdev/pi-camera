@@ -61,10 +61,17 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 	console.log("Sending file: (" + event + ") " + filePath);
 	var fileName = path.basename(filePath);
 	var fsStream = fs.createReadStream(filePath);
-	fsStream.on('error', cb);
+	fsStream.on('error', function (err) {
+		console.log("fsSteam error - " + err);
+		cb(err);
+	}
 	fsStream.on('readable', function () {
+		console.log("sendFile - " + filePath + " is readable.");
 		var stream = ioStream.createStream();
-		stream.on('finish', cb);
+		stream.on('finish', function () {
+			console.log("fsStream finished");
+			cb();
+		});
 		fsStream.pipe(stream);
 		ioStream(socket).emit(event, stream, {timestamp: timestamp, name:fileName});
 	});
