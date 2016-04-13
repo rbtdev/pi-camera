@@ -39,13 +39,17 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		console.log("Using RaspiCam");
 
 		var cameraOptions  = {
-			mode: "photo",
-			output: filePath
+			mode: "timelapse",
+			output: filePath,
+			tl: 250
 		}
 		var camera = new RaspiCam(cameraOptions);
 		camera.on("read", function(err, timestamp, filename){ 
 			if (err) console.log("ERROR-" + err);
-			else //sendImage(imageDir + newFileName);
+			console.log("filename = " + filename);
+			if (filename.indexOf('~') < 0) {
+			  sendImage(imageDir + filename);
+			}
 		});
 		camera.on("start", function () {
 			console.log("Camera started.");
