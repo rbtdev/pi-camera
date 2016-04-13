@@ -16,7 +16,7 @@ function Controller (name, id) {
 	this.sensor = require('./pi-cam');
 	this.sensor.on('motion', onMotion.bind(this));
 	this.sensor.on('timelapse', onTimelapse.bind(this));
-	this.sensor.on('image', onImage.bind(this));
+	this.sensor.on('thumbnail', onImage.bind(this));
 }
 
 Controller.prototype.connect = function () {
@@ -65,12 +65,32 @@ function onImage(data) {
 	stream.on('finish', function () {
 		console.log("Image uploaded.");
 	});
-	ioStream(this.socket).emit('image', stream, {timestamp: timestamp, name:path.basename(imagePath)});
+	ioStream(this.socket).emit('thumbnail', stream, {timestamp: timestamp, name:path.basename(imagePath)});
 	fs.createReadStream(imagePath).pipe(stream);
 }
 
-function onTimelapse(imagePath) {
-	console.log("Timlapse frames completed in " + imagePath);
+function onTimelapse(data) {
+	var timestamp = data.timestamp;
+	var imageDir = data.imageDir;
+	var _this = this;
+	console.log("Timlapse frames completed in " + imageDir);
+	fs.readdir(imageDir, function (err, files) {
+		if (err) return console.log("Err reading image dir " + err);
+		console.log("files found: " + files);
+		files.forEach(function (fileName) {
+			var imagePath = imageDir + "/" + fileName;
+			console.log("Sending " + imagePath)
+			var fsStream = fs.createReadStream(imagePath);
+			fsStream.on('error', function (error) {console.log("Cant open file " + fileName, error);});
+			fsStream.on('readable', function () {
+				var stream = ioStream.createStream();
+				stream.on('finish', function () {console.log("Frame uploaded.");});
+				fsStream.pipe(stream);
+				ioStream(_this.socket).emit('frame', stream, {timestamp: timestamp, name:fileName});
+			});
+			
+		})
+	});
 }
 
 function onActivate () {

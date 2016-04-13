@@ -53,7 +53,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 			console.log("filename = " + filename);
 			if (filename.indexOf('~') < 0 && !preview) {
 				preview = imageDir + filename;
-				_this.emit('image', {timestamp:timestamp, imagePath: preview});
+				_this.emit('thumbnail', {timestamp:timestamp, imagePath: preview});
 			}
 		});
 		camera.on("start", function () {
@@ -62,7 +62,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		camera.on("exit", function () {
 			console.log("Camera stopped");
 			if (preview) {
-				_this.emit('timelapse', imageDir);
+				_this.emit('timelapse', {timestamp: timestamp, imageDir:imageDir});
 			}
 			else {
 				console.log("No files were processed.");
@@ -78,13 +78,13 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		var imageDir = __dirname + "/images/"
 		_sendImage();
 		function _sendImage() {
-			_this.emit('image',{timestamp: timestamp, imagePath: imageDir + "pi_logo.png"});
+			_this.emit('thumbnail',{timestamp: timestamp, imagePath: imageDir + "pi_logo.png"});
 			count++;
 			if (count < 5) {
 				setTimeout(_sendImage, 100);
 			}
 			else {
-				_this.emit('timelapse', imageDir)
+				_this.emit('timelapse', {timestamp: timestamp, imageDir: imageDir})
 			}
 		}
 	}
