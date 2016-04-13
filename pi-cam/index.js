@@ -50,7 +50,8 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		var preview = null;
 		camera.on("read", function(err, imageTime, filename){ 
 			if (err) console.log("ERROR-" + err);
-			console.log("filename = " + filename);
+			console.log("Camera sent filename = " + filename);
+			console.log("  prview = " + preview);
 			if (filename.indexOf('~') < 0 && !preview) {
 				preview = imageDir + filename;
 				_this.emit('thumbnail', {timestamp:timestamp, imagePath: preview});
