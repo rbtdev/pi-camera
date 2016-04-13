@@ -49,7 +49,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 			if (err) console.log("ERROR-" + err);
 			console.log("filename = " + filename);
 			if (filename.indexOf('~') < 0) {
-				filename.push(filename);
+				filenames.push(filename);
 			  //sendImage(imageDir + filename);
 			}
 		});
