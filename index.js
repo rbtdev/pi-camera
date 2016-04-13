@@ -92,7 +92,7 @@ function onTimelapse(data) {
 	fs.readdir(imageDir, function (err, files) {
 		if (err) return console.log("Err reading image dir " + err);
 		console.log("files found: " + files);
-		var filecount = files.length;
+		var filecount = 0;
 		files.forEach(function (fileName) {
 			var imagePath = imageDir + "/" + fileName;
 			sendFile(_this.socket, 'frame', data.timestamp, imagePath, function (err) {
