@@ -65,8 +65,8 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 		console.log("fsSteam error - " + err);
 		cb(err);
 	});
-	fsStream.on('readable', function () {
-		console.log("sendFile - " + filePath + " is readable.");
+	fsStream.on('open', function () {
+		console.log("sendFile - " + filePath + " is open.");
 		var stream = ioStream.createStream();
 		stream.on('finish', function () {
 			console.log("fsStream finished");
