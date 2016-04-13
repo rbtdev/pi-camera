@@ -32,7 +32,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	// simulate image taken after 5 seconds
 	var imageDir = __dirname + "/images/capture/" + timestamp + "/";
 	fs.mkdirSync(imageDir);
-	var fileName = "capture_%d.jpg"
+	var fileName = "frame_%d.jpg"
 	var filePath = imageDir + fileName;
 	console.log("Image dir = " + imageDir)
 	if (RaspiCam) {
@@ -41,21 +41,23 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		var cameraOptions  = {
 			mode: "timelapse",
 			output: filePath,
-			tl: 250
+			tl: 250,
+			rot: 180,
 		}
 		var camera = new RaspiCam(cameraOptions);
 		camera.on("read", function(err, timestamp, filename){ 
 			if (err) console.log("ERROR-" + err);
 			console.log("filename = " + filename);
 			if (filename.indexOf('~') < 0) {
-			  sendImage(imageDir + filename);
+			  //sendImage(imageDir + filename);
 			}
 		});
 		camera.on("start", function () {
 			console.log("Camera started.");
 		})
-		camera.on("stop", function () {
+		camera.on("exit", function () {
 			console.log("Camera stopped");
+			sendImage(imageDir + "frame_0.jpg")
 		})
 
 		console.log("Starting image capture.");
