@@ -37,7 +37,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	console.log("Image dir = " + imageDir)
 	if (RaspiCam) {
 		console.log("Using RaspiCam");
-
+		var filenames = [];
 		var cameraOptions  = {
 			mode: "timelapse",
 			output: filePath,
@@ -49,6 +49,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 			if (err) console.log("ERROR-" + err);
 			console.log("filename = " + filename);
 			if (filename.indexOf('~') < 0) {
+				filename.push(filename);
 			  //sendImage(imageDir + filename);
 			}
 		});
@@ -57,7 +58,12 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		})
 		camera.on("exit", function () {
 			console.log("Camera stopped");
-			sendImage(imageDir + "frame_0.jpg")
+			if (filenames[0]) {
+				sendImage(imageDir + filenames[0])
+			}
+			else {
+				console.log("No files were processed.");
+			}
 		})
 
 		console.log("Starting image capture.");
