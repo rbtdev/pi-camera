@@ -30,6 +30,7 @@ PiCam.prototype.deactivate = function (callback) {
 
 PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	// simulate image taken after 5 seconds
+	var _this = this;
 	var imageDir = __dirname + "/images/capture/" + timestamp + "/";
 	fs.mkdirSync(imageDir);
 	var fileName = "frame_%d.jpg"
@@ -45,12 +46,13 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 			rot: 180,
 		}
 		var camera = new RaspiCam(cameraOptions);
+		var preview = null;
 		camera.on("read", function(err, timestamp, filename){ 
 			if (err) console.log("ERROR-" + err);
 			console.log("filename = " + filename);
-			if (filename.indexOf('~') < 0) {
-				filenames.push(filename);
-			  //sendImage(imageDir + filename);
+			if (filename.indexOf('~') < 0 && !preview) {
+				preview = imageDir + filename;
+				_this.emit('image', {timestamp:timestamp, imagePath: preview});
 			}
 		});
 		camera.on("start", function () {
@@ -58,8 +60,8 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		})
 		camera.on("exit", function () {
 			console.log("Camera stopped");
-			if (filenames[0]) {
-				sendImage(imageDir + filenames[0])
+			if (preview) {
+				_this.emit('timelapse', imageDir);
 			}
 			else {
 				console.log("No files were processed.");
@@ -72,12 +74,16 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	else {
 		console.log("Sending test images.");
 		var count = 0;
+		var imageDir = __dirname + "/images/"
 		_sendImage();
 		function _sendImage() {
-			sendImage(__dirname + "/images/pi_logo.png");
+			_this.emit('image',{timestamp: timestamp, imagePath: imageDir + "pi_logo.png"});
 			count++;
 			if (count < 5) {
 				setTimeout(_sendImage, 100);
+			}
+			else {
+				_this.emit('timelapse', imageDir)
 			}
 		}
 	}

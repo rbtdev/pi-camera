@@ -15,6 +15,8 @@ function Controller (name, id) {
 	this.id = id;
 	this.sensor = require('./pi-cam');
 	this.sensor.on('motion', onMotion.bind(this));
+	this.sensor.on('timelapse', onTimelapse.bind(this));
+	this.sensor.on('image', onImage.bind(this));
 }
 
 Controller.prototype.connect = function () {
@@ -46,9 +48,7 @@ function onMotion () {
 	this.socket.emit("alarm", {type: "motion", timestamp: timestamp});
 	// Activate camera
 	var _this = this;
-	this.sensor.startCamera(timestamp, function (imagePath) {
-		_this.sendImage(timestamp, imagePath);
-	})
+	this.sensor.startCamera(timestamp);
 	this.playAlarm();
 };
 
@@ -57,7 +57,9 @@ Controller.prototype.playAlarm = function () {
 	alarm.play();
 }
 
-Controller.prototype.sendImage = function (timestamp, imagePath) {
+function onImage(data) {
+	var timestamp = data.timestamp;
+	var imagePath = data.imagePath
 	console.log("Image generated. Sending to cloud. Path = " + imagePath);
 	var stream = ioStream.createStream();
 	stream.on('finish', function () {
@@ -65,7 +67,11 @@ Controller.prototype.sendImage = function (timestamp, imagePath) {
 	});
 	ioStream(this.socket).emit('image', stream, {timestamp: timestamp, name:path.basename(imagePath)});
 	fs.createReadStream(imagePath).pipe(stream);
-};
+}
+
+function onTimelapse(imagePath) {
+	console.log("Timlapse frames completed in " + imagePath);
+}
 
 function onActivate () {
 	console.log("PiSim: Turning motion detection system on");
