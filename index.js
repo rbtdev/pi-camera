@@ -58,7 +58,6 @@ Controller.prototype.playAlarm = function () {
 }
 
 function sendFile(socket, event, timestamp, filePath, cb) {
-	console.log("Sending file: (" + event + ") " + filePath);
 	var fileName = path.basename(filePath);
 	var fsStream = fs.createReadStream(filePath);
 	fsStream.on('error', function (err) {
@@ -66,10 +65,8 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 		cb(err);
 	});
 	fsStream.on('open', function () {
-		console.log("sendFile - " + filePath + " is open.");
 		var stream = ioStream.createStream();
 		stream.on('finish', function () {
-			console.log("fsStream finished");
 			cb();
 		});
 		fsStream.pipe(stream);
@@ -78,10 +75,8 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 }
 
 function onImage(data) {
-	console.log("Got thumbnail event, calling sendFile");
 	sendFile(this.socket, 'thumbnail', data.timestamp, data.imagePath, function (err) {
 		if (err) return console.log("Error uploading file: " + err);
-		console.log("Thumbnail uploaded.");
 	});
 }
 
