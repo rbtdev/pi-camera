@@ -101,6 +101,7 @@ function onTimelapse(data) {
 				console.log("Frame " + fileName + " uploaded.");
 				if (filecount >= files.length) {
 					_this.socket.emit('mjpeg', data.timestamp);
+					removeDirRecursive(imageDir);
 				}
 			});
 		});
@@ -127,6 +128,21 @@ function onDeactivate () {
 			_this.socket.emit('status', {status: _this.status});
 		}
 	});
+}
+
+function removeDirRecursive(path) {
+  console.log("Removing recursive " + path)
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+        removeDirRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
 }
 
 var controller = new Controller(env.NAME, env.GUID)
