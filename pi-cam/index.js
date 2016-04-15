@@ -42,9 +42,9 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		var cameraOptions  = {
 			mode: "timelapse",
 			output: filePath,
-			tl: 250,
+			tl: 125,
 			rot: 180,
-			t: 15000
+			t: 30000
 		}
 		var camera = new RaspiCam(cameraOptions);
 		var preview = null;
@@ -96,6 +96,6 @@ setInterval(function () {
 		console.log("Simulating motion detection");
 		piCam.emit('motion');
 	}
-},30*1000)
+},2*60*1000)
 
 module.exports = piCam;
