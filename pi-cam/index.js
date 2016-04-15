@@ -33,7 +33,7 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	var _this = this;
 	var imageDir = __dirname + "/images/capture/" + timestamp + "/";
 	fs.mkdirSync(imageDir);
-	var fileName = "frame_%d.jpg"
+	var fileName = "frame_%04d.jpg"
 	var filePath = imageDir + fileName;
 	console.log("Image dir = " + imageDir)
 	if (RaspiCam) {
