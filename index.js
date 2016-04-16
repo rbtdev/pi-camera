@@ -83,17 +83,14 @@ function onImage(data) {
 function onTimelapse(data) {
 	var imageDir = data.imageDir;
 	var _this = this;
-	console.log("Timlapse frames completed in " + imageDir);
 	fs.readdir(imageDir, function (err, files) {
 		if (err) return console.log("Err reading image dir " + err);
-		console.log("files found: " + files);
 		var filecount = 0;
 		files.forEach(function (fileName) {
 			var imagePath = imageDir + "/" + fileName;
 			sendFile(_this.socket, 'frame', data.timestamp, imagePath, function (err) {
 				filecount++;
 				if (err) return console.log("Error uploading frame: " + err);
-				console.log("Frame " + fileName + " uploaded.");
 				if (filecount >= files.length) {
 					_this.socket.emit('mjpeg', data.timestamp);
 					removeDirRecursive(imageDir);
@@ -126,7 +123,6 @@ function onDeactivate () {
 }
 
 function removeDirRecursive(path) {
-  console.log("Removing recursive " + path)
   if( fs.existsSync(path) ) {
     fs.readdirSync(path).forEach(function(file,index){
       var curPath = path + "/" + file;

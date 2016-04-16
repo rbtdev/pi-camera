@@ -38,7 +38,6 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	fs.mkdirSync(imageDir);
 	var fileName = "frame_%04d.jpg"
 	var filePath = imageDir + fileName;
-	console.log("Image dir = " + imageDir)
 	var filenames = [];
 	var cameraOptions  = {
 		mode: "timelapse",
@@ -57,10 +56,8 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		}
 	});
 	camera.on("start", function () {
-		console.log("Camera started.");
 	})
 	camera.on("exit", function () {
-		console.log("Camera stopped");
 		if (preview) {
 			_this.emit('timelapse', {timestamp: timestamp, imageDir:imageDir});
 		}
