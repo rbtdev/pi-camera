@@ -3,12 +3,15 @@ const EventEmitter = require('events');
 var env = require('../config');
 var moment = require('moment');
 var fs = require('fs');
+var util = require('util');
+
 var RaspiCam = null;
 if (env.PRODUCTION) {
-	var RaspiCam = require("raspicam");
-};
-
-const util = require('util');
+	RaspiCam = require("raspicam");
+}
+else {
+	RaspiCam = require("./raspicam_test.js");
+}
 
 function PiCam () {
 	this.active = false;
@@ -36,66 +39,49 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 	var fileName = "frame_%04d.jpg"
 	var filePath = imageDir + fileName;
 	console.log("Image dir = " + imageDir)
-	if (RaspiCam) {
-		console.log("Using RaspiCam");
-		var filenames = [];
-		var cameraOptions  = {
-			mode: "timelapse",
-			output: filePath,
-			tl: 125,
-			rot: 180,
-			t: 30000
+	var filenames = [];
+	var cameraOptions  = {
+		mode: "timelapse",
+		output: filePath,
+		tl: 125,
+		rot: 180,
+		t: 30000
+	}
+	var camera = new RaspiCam(cameraOptions);
+	var preview = null;
+	camera.on("read", function(err, imageTime, filename){ 
+		if (err) console.log("ERROR-" + err);
+		if (filename.indexOf('~') < 0 && !preview) {
+			preview = imageDir + filename;
+			_this.emit('thumbnail', {timestamp:timestamp, imagePath: preview});
 		}
-		var camera = new RaspiCam(cameraOptions);
-		var preview = null;
-		camera.on("read", function(err, imageTime, filename){ 
-			if (err) console.log("ERROR-" + err);
-			if (filename.indexOf('~') < 0 && !preview) {
-				preview = imageDir + filename;
-				_this.emit('thumbnail', {timestamp:timestamp, imagePath: preview});
-			}
-		});
-		camera.on("start", function () {
-			console.log("Camera started.");
-		})
-		camera.on("exit", function () {
-			console.log("Camera stopped");
-			if (preview) {
-				_this.emit('timelapse', {timestamp: timestamp, imageDir:imageDir});
-			}
-			else {
-				console.log("No files were processed.");
-			}
-		})
+	});
+	camera.on("start", function () {
+		console.log("Camera started.");
+	})
+	camera.on("exit", function () {
+		console.log("Camera stopped");
+		if (preview) {
+			_this.emit('timelapse', {timestamp: timestamp, imageDir:imageDir});
+		}
+		else {
+			console.log("No files were processed.");
+		}
+	})
 
-		console.log("Starting image capture.");
-		camera.start();
-	}
-	else {
-		console.log("Sending test images.");
-		var count = 0;
-		var imageDir = __dirname + "/images/"
-		_sendImage();
-		function _sendImage() {
-			_this.emit('thumbnail',{timestamp: timestamp, imagePath: imageDir + "pi_logo.png"});
-			count++;
-			if (count < 5) {
-				setTimeout(_sendImage, 100);
-			}
-			else {
-				_this.emit('timelapse', {timestamp: timestamp, imageDir: imageDir})
-			}
-		}
-	}
+	console.log("Starting image capture.");
+	camera.start();
 };
 
 
 var piCam = new PiCam();
-setInterval(function () {
+function detectMotion() {
 	if (piCam.active) {
-		console.log("Simulating motion detection");
 		piCam.emit('motion');
 	}
-},2*60*1000)
+}
+
+detectMotion();
+setInterval(detectMotion,60*1000)
 
 module.exports = piCam;
