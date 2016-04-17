@@ -22,9 +22,9 @@ Raspicam.prototype.start = function () {
 		fs.writeFileSync(outfile, data);
 		_this.emit('read', null, "", path.basename(outfile));
 		count++
-		if (count <= _this.options.tl*_this.options.t/1000)
+		if (count <= 10)
 		{
-			setTimeout(sendFile, _this.tl);
+			setTimeout(sendFile, 250);
 		}
 		else {
 			_this.emit('exit');

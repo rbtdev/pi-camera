@@ -1,9 +1,9 @@
-var gpio = require('rpi-gpio')
 const EventEmitter = require('events');
 var env = require('../config');
 var moment = require('moment');
 var fs = require('fs');
 var util = require('util');
+var Led = require('../led');
 
 var RaspiCam = null;
 if (env.PRODUCTION) {
@@ -15,23 +15,13 @@ else {
 
 function PiCam () {
 	this.active = false;
+	this.led = new Led(26);
+	this.led.off();
 	EventEmitter.call(this);
 }
 util.inherits(PiCam, EventEmitter);
 
-PiCam.prototype.activate = function (callback) {
-		this.active = true;
-		err = null;
-		if (callback) callback(err);
-};
-
-PiCam.prototype.deactivate = function (callback) {
-	this.active = false;
-	err = null;
-	if (callback) callback(err);
-}
-
-PiCam.prototype.startCamera = function (timestamp, sendImage) {
+PiCam.prototype.startTimelapse = function (timestamp, sendImage) {
 	// simulate image taken after 5 seconds
 	var _this = this;
 	var imageDir = __dirname + "/images/capture/" + timestamp + "/";
@@ -64,21 +54,14 @@ PiCam.prototype.startCamera = function (timestamp, sendImage) {
 		else {
 			console.log("No files were processed.");
 		}
+		_this.led.off();
 	})
 
 	console.log("Starting image capture.");
+	this.led.on();
 	camera.start();
 };
 
 
 var piCam = new PiCam();
-function detectMotion() {
-	if (piCam.active) {
-		piCam.emit('motion');
-	}
-}
-
-detectMotion();
-setInterval(detectMotion,60*1000)
-
 module.exports = piCam;

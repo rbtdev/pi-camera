@@ -10,50 +10,55 @@ var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
 function Controller (name, id) {
 
 	this.status = 'disabled';
-	this.socket = null;
+	this.cloud = null;
 	this.name = name;
 	this.id = id;
-	this.sensor = require('./pi-cam');
+	this.camera = require('./camera');
+	this.sensor = require('./motion-sensor');
 	this.sensor.on('motion', onMotion.bind(this));
-	this.sensor.on('thumbnail', onImage.bind(this));
-	this.sensor.on('timelapse', onTimelapse.bind(this));
+	this.camera.on('thumbnail', onImage.bind(this));
+	this.camera.on('timelapse', onTimelapse.bind(this));
 }
 
 Controller.prototype.connect = function () {
 	console.log("Connecting to " + env.CAMERA_CONTROLLER_ENDPOINT);
-	this.socket = ioClient.connect(env.CAMERA_CONTROLLER_ENDPOINT);
-	this.socket.on('connect', onConnect.bind(this))
+	this.cloud = ioClient.connect(env.CAMERA_CONTROLLER_ENDPOINT);
+	this.cloud.on('connect', onConnect.bind(this))
 };
 
 function onConnect () {
-	this.socket.on('activate', onActivate.bind(this));
-	this.socket.on('deactivate', onDeactivate.bind(this));
-	this.socket.on('disconnect', onDisconnect.bind(this));
+	this.cloud.on('activate', onActivate.bind(this));
+	this.cloud.on('deactivate', onDeactivate.bind(this));
+	this.cloud.on('disconnect', onDisconnect.bind(this));
 	console.log("Camera connected, registering " + this.name);
-	this.socket.emit('register', {name: this.name, id:this.id})
-	this.socket.emit('status', {status: this.status});	
+	this.cloud.emit('register', {name: this.name, id:this.id})
+	this.cloud.emit('status', {status: this.status});	
 };
 
 function onDisconnect() {
 	console.log("Controller disconnected. Clearing event listeners.");
-	this.socket.removeAllListeners("activate");
-	this.socket.removeAllListeners('activate');
-	this.socket.removeAllListeners('deactivate');
-	this.socket.removeAllListeners('disconnect');
+	this.cloud.removeAllListeners("activate");
+	this.cloud.removeAllListeners('activate');
+	this.cloud.removeAllListeners('deactivate');
+	this.cloud.removeAllListeners('disconnect');
 }
 
 function onMotion () {
 	console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
+	this.sensor.deactivate();
 	var timestamp = moment().format("YYYYMMDDHHmmss");
-	this.socket.emit("alarm", {type: "motion", timestamp: timestamp});
-	// Activate camera
-	var _this = this;
-	this.sensor.startCamera(timestamp);
-	this.playAlarm();
+
+	// notify cloud that we have motion;
+	this.cloud.emit("alarm", {type: "motion", timestamp: timestamp});
+
+	// Activate camera and play alarm
+	this.camera.startTimelapse(timestamp);
+
+	// Play Alarm
+	this.playAlarm(20);
 };
 
-Controller.prototype.playAlarm = function () {
-	console.log("Playing alarm sound");
+Controller.prototype.playAlarm = function  () {
 	alarm.play();
 }
 
@@ -75,7 +80,7 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 }
 
 function onImage(data) {
-	sendFile(this.socket, 'thumbnail', data.timestamp, data.imagePath, function (err) {
+	sendFile(this.cloud, 'thumbnail', data.timestamp, data.imagePath, function (err) {
 		if (err) return console.log("Error uploading file: " + err);
 	});
 }
@@ -88,11 +93,12 @@ function onTimelapse(data) {
 		var filecount = 0;
 		files.forEach(function (fileName) {
 			var imagePath = imageDir + "/" + fileName;
-			sendFile(_this.socket, 'frame', data.timestamp, imagePath, function (err) {
+			sendFile(_this.cloud, 'frame', data.timestamp, imagePath, function (err) {
 				filecount++;
 				if (err) return console.log("Error uploading frame: " + err);
 				if (filecount >= files.length) {
-					_this.socket.emit('mjpeg', data.timestamp);
+					_this.cloud.emit('mjpeg', data.timestamp);
+					_this.sensor.activate();
 					removeDirRecursive(imageDir);
 				}
 			});
@@ -102,24 +108,16 @@ function onTimelapse(data) {
 
 function onActivate () {
 	console.log("PiSim: Turning motion detection system on");
-	var _this = this;
-	this.sensor.activate(function (err) {
-		if (!err) {
-			_this.status = 'active';
-			_this.socket.emit('status', {status: _this.status});
-		}
-	});
+	this.sensor.activate();
+	this.status = 'active';
+	this.cloud.emit('status', {status: this.status});
 }
 
 function onDeactivate () {
 	console.log("PiSim: Turning motion detection system off");
-	var _this = this;
-	this.sensor.deactivate(function (err) {
-		if (!err) {
-			_this.status = 'disabled';
-			_this.socket.emit('status', {status: _this.status});
-		}
-	});
+	this.sensor.off();
+	this.status = 'disabled';
+	this.cloud.emit('status', {status: this.status});
 }
 
 function removeDirRecursive(path) {
