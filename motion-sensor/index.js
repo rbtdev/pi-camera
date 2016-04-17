@@ -25,7 +25,18 @@ function Sensor() {
 util.inherits(Sensor, EventEmitter);
 
 function detectorChanged (err, value) {
-	console.log('Detecter changed: ' + value);
+	if (value === 1) {
+		console.log("Motion detected.");
+		if (this.active) {
+			this.emit('motion');
+		}
+		else {
+			console.log("Sensor inactive, not reporting motion.")
+		}
+	}
+	else {
+		console.log("Sensor reset");
+	}
 };
 
 Sensor.prototype.activate = function () {
@@ -43,13 +54,13 @@ Sensor.prototype.deactivate = function () {
 var sensor = new Sensor();
 
 
-function detectMotion() {
-	if (sensor.active) {
-		console.log("Sensor sending motion event.");
-		sensor.emit('motion');
-	}
-}
+// function detectMotion() {
+// 	if (sensor.active) {
+// 		console.log("Sensor sending motion event.");
+// 		sensor.emit('motion');
+// 	}
+// }
 
-setInterval(detectMotion,60*1000)
+// setInterval(detectMotion,60*1000)
 
 module.exports = sensor;
