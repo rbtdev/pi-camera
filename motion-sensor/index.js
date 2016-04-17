@@ -1,15 +1,19 @@
 var EventEmitter = require('events');
 var util = require('util');
+var Gpio = require('onoff').Gpio
 
-var GPIO = require('onoff').GPIO;
+var detecter = new Gpio(22, 'in', 'both');
 
 function Sensor() {
 	this.active = false;
-	// set GPIO pin to off
+	detecter.watch(detecterChanged.bind(this);
 	EventEmitter.call(this);
 }
 util.inherits(Sensor, EventEmitter);
 
+function detecterChanged (err, value) {
+	console.log('Detecter changed: ' + value);
+};
 
 Sensor.prototype.activate = function () {
 	console.log("Sensor on.");
