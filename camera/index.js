@@ -15,7 +15,7 @@ else {
 
 function PiCam () {
 	this.active = false;
-	this.led = new Led(26);
+	this.led = new Led();
 	this.led.off();
 	EventEmitter.call(this);
 }

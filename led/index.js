@@ -1,22 +1,20 @@
-var GPIO = require('onoff').Gpio;
+var Gpio = require('onoff').Gpio;
 var env = require('../config');
+var led = new Gpio(26,'out');
 
 if (env.PRODUCTION) {
 	function Led(pin) {
-		console.log("Initializing LED on pin " + pin);
-		this.pin = pin
-		this.led = new Gpio(this.pin, 'out');
-		this.led.writeSync(0);
+		led.writeSync(0);
 	}
 
 	Led.prototype.on = function () {
 		console.log("LED turned on");
-		this.led.writeSync(1);
+		led.writeSync(1);
 	}
 
 	Led.prototype.off = function () {
 		console.log("LED turned off");
-		this.led.writeSync(0);
+		led.writeSync(0);
 	}
 }
 else {
