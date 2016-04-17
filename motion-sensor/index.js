@@ -4,25 +4,27 @@ var util = require('util');
 var env = require('../config');
 
 if (env.PRODUCTION) {
+	console.log("Using physical GPIO");
 	var Gpio = require('onoff').Gpio;
-	var detecter = new Gpio(22, 'in', 'both');
+	var detector = new Gpio(22, 'in', 'both');
 }
 else {
+	console.log("Using simulated GPIO");
 	var detector = {
 		watch: function (cb) {
-
+		  console.log("Simulating motion detector.")
 		}
 	}
 }
 
 function Sensor() {
 	this.active = false;
-	detecter.watch(detecterChanged.bind(this);
+	detector.watch(detectorChanged.bind(this));
 	EventEmitter.call(this);
 }
 util.inherits(Sensor, EventEmitter);
 
-function detecterChanged (err, value) {
+function detectorChanged (err, value) {
 	console.log('Detecter changed: ' + value);
 };
 
