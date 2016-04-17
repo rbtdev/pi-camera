@@ -1,32 +1,31 @@
-var Gpio = require('onoff').Gpio;
 var env = require('../config');
-var led = new Gpio(26,'out');
+
 
 if (env.PRODUCTION) {
-	function Led(pin) {
-		led.writeSync(0);
-	}
-
-	Led.prototype.on = function () {
-		console.log("LED turned on");
-		led.writeSync(1);
-	}
-
-	Led.prototype.off = function () {
-		console.log("LED turned off");
-		led.writeSync(0);
-	}
+	var Gpio = require('onoff').Gpio;
+	var led = new Gpio(26,'out');
 }
 else {
-	function Led(pin) {
-		console.log("Initializing LED on pin " + pin);
+	var led = {
+		writeSync: function (value) {
+			console.log('simulating LED value = ' + value)
+		}
 	}
-	Led.prototype.on = function () {
-		console.log("LED turned on");
-	}
-	Led.prototype.off = function () {
-		console.log("LED turned off");
-	}
+}
+
+
+function Led(pin) {
+	led.writeSync(0);
+}
+
+Led.prototype.on = function () {
+	console.log("LED turned on");
+	led.writeSync(1);
+}
+
+Led.prototype.off = function () {
+	console.log("LED turned off");
+	led.writeSync(0);
 }
 
 module.exports = Led;

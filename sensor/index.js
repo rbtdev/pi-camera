@@ -9,12 +9,28 @@ if (env.PRODUCTION) {
 	var detector = new Gpio(22, 'in', 'both');
 }
 else {
-	console.log("Using simulated GPIO");
-	var detector = {
-		watch: function (cb) {
-		  console.log("Simulating motion detector.")
+	function Detector () {
+		this.watch = function (cb) {
+			this.cb = cb;
+		};
+
+		this.set = function (value) {
+			this.cb(null, value);
 		}
 	}
+
+
+	var detector = new Detector();
+
+	console.log("Using simulated GPIO");
+	function detectMotion() {
+		console.log("Simulating motion");
+		detector.set(1);
+		setTimeout(function () {
+			detector.set(0)
+		}, 30*1000);
+	}
+	setInterval(detectMotion,60*1000)
 }
 
 function Sensor() {
@@ -28,6 +44,7 @@ function detectorChanged (err, value) {
 	if (value === 1) {
 		console.log("Motion detected.");
 		if (this.active) {
+			this.active = false;
 			this.emit('motion');
 		}
 		else {
@@ -35,6 +52,7 @@ function detectorChanged (err, value) {
 		}
 	}
 	else {
+		this.active = true;
 		console.log("Sensor reset");
 	}
 };
@@ -42,25 +60,17 @@ function detectorChanged (err, value) {
 Sensor.prototype.activate = function () {
 	console.log("Sensor on.");
 	this.active = true;
-	// set GPIP pin to off;
 }
 
 Sensor.prototype.deactivate = function () {
 	console.log("Sensor off.");
 	this.active = false;
-	// set GPIP pin to off;
+;
 }
 
 var sensor = new Sensor();
 
 
-// function detectMotion() {
-// 	if (sensor.active) {
-// 		console.log("Sensor sending motion event.");
-// 		sensor.emit('motion');
-// 	}
-// }
 
-// setInterval(detectMotion,60*1000)
 
 module.exports = sensor;

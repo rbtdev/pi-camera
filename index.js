@@ -14,7 +14,7 @@ function Controller (name, id) {
 	this.name = name;
 	this.id = id;
 	this.camera = require('./camera');
-	this.sensor = require('./motion-sensor');
+	this.sensor = require('./sensor');
 	this.sensor.on('motion', onMotion.bind(this));
 	this.camera.on('thumbnail', onImage.bind(this));
 	this.camera.on('timelapse', onTimelapse.bind(this));
@@ -115,7 +115,7 @@ function onActivate () {
 
 function onDeactivate () {
 	console.log("PiSim: Turning motion detection system off");
-	this.sensor.off();
+	this.sensor.deactivate();
 	this.status = 'disabled';
 	this.cloud.emit('status', {status: this.status});
 }
