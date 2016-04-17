@@ -1,8 +1,19 @@
 var EventEmitter = require('events');
 var util = require('util');
-var Gpio = require('onoff').Gpio
 
-var detecter = new Gpio(22, 'in', 'both');
+var env = require('../config');
+
+if (env.PRODUCTION) {
+	var Gpio = require('onoff').Gpio;
+	var detecter = new Gpio(22, 'in', 'both');
+}
+else {
+	var detector = {
+		watch: function (cb) {
+
+		}
+	}
+}
 
 function Sensor() {
 	this.active = false;
