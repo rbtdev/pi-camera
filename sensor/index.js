@@ -44,7 +44,6 @@ function detectorChanged (err, value) {
 	if (value === 1) {
 		console.log("Motion detected.");
 		if (this.active) {
-			this.active = false;
 			this.emit('motion');
 		}
 		else {
@@ -52,7 +51,6 @@ function detectorChanged (err, value) {
 		}
 	}
 	else {
-		this.active = true;
 		console.log("Sensor reset");
 	}
 };
