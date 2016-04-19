@@ -13,6 +13,7 @@ function Controller (name, id) {
 	this.cloud = null;
 	this.name = name;
 	this.id = id;
+	this.motion = false;
 	this.camera = require('./camera');
 	this.sensor = require('./sensor');
 	this.sensor.on('motion', onMotion.bind(this));
@@ -44,18 +45,24 @@ function onDisconnect() {
 }
 
 function onMotion () {
-	console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
-	this.sensor.deactivate();
-	var timestamp = moment().format("YYYYMMDDHHmmss");
+	if (!this.motion) {
+		console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
+		this.motion = true;
+		this.sensor.deactivate();
+		var timestamp = moment().format("YYYYMMDDHHmmss");
 
-	// notify cloud that we have motion;
-	this.cloud.emit("alarm", {type: "motion", timestamp: timestamp});
+		// notify cloud that we have motion;
+		this.cloud.emit("alarm", {type: "motion", timestamp: timestamp});
 
-	// Activate camera and play alarm
-	this.camera.startTimelapse(timestamp);
+		// Activate camera and play alarm
+		this.camera.startTimelapse(timestamp);
 
-	// Play Alarm
-	this.playAlarm(20);
+		// Play Alarm
+		this.playAlarm(20);
+	}
+	else {
+		console.log("Capturing video. Ignoring any motion alarms.");
+	}
 };
 
 Controller.prototype.playAlarm = function  () {
@@ -98,7 +105,7 @@ function onTimelapse(data) {
 				if (err) return console.log("Error uploading frame: " + err);
 				if (filecount >= files.length) {
 					_this.cloud.emit('mjpeg', data.timestamp);
-					_this.sensor.activate();
+					_this.motion = false; // done capturing, allow new motion events.
 					removeDirRecursive(imageDir);
 				}
 			});
