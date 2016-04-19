@@ -48,7 +48,6 @@ function onMotion () {
 	if (!this.motion) {
 		console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
 		this.motion = true;
-		this.sensor.deactivate();
 		var timestamp = moment().format("YYYYMMDDHHmmss");
 
 		// notify cloud that we have motion;
