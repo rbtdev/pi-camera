@@ -5,7 +5,7 @@ var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
 var Sound = require('node-aplay');
-var Exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
 
 function Controller (name, id) {
@@ -47,11 +47,8 @@ function onDisconnect() {
 }
 
 function onSpeak(text) {
-	fs.writeFile('voicetext.txt', text, function (err) {
-  		if (err) return console.log(err);
-  		console.log("wrote " + text + " to file");
-  		Exec("festival --tts < voicetext.txt");
-	});
+	 speak = spawn("festival --tts");
+	 speak.stdin.write(text);
 }
 
 function onMotion () {
