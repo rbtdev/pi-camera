@@ -5,6 +5,7 @@ var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
 var Sound = require('node-aplay');
+var Exec = require('child_process').exec;
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
 
 function Controller (name, id) {
@@ -31,6 +32,7 @@ function onConnect () {
 	this.cloud.on('activate', onActivate.bind(this));
 	this.cloud.on('deactivate', onDeactivate.bind(this));
 	this.cloud.on('disconnect', onDisconnect.bind(this));
+	this.cloud.on('speak', onSpeak.bind(this));
 	console.log("Camera connected, registering " + this.name);
 	this.cloud.emit('register', {name: this.name, id:this.id})
 	this.cloud.emit('status', {status: this.status});	
@@ -42,6 +44,12 @@ function onDisconnect() {
 	this.cloud.removeAllListeners('activate');
 	this.cloud.removeAllListeners('deactivate');
 	this.cloud.removeAllListeners('disconnect');
+}
+
+function onSpeak(text) {
+	var command = "echo '" + text + "' | festival --tts"
+	console.log("Sending exex command: " + command);
+	Exec(command);
 }
 
 function onMotion () {
