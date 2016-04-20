@@ -5,7 +5,7 @@ var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
 var Sound = require('node-aplay');
-var spawn = require('child_process').spawn;
+var spawn  = require('child_process').spawn;
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
 
 function Controller (name, id) {
@@ -47,8 +47,9 @@ function onDisconnect() {
 }
 
 function onSpeak(text) {
-	 speak = spawn("festival --tts");
+	 speak = spawn("festival",["--tts"]);
 	 speak.stdin.write(text);
+	 speak.stdin.end();
 }
 
 function onMotion () {

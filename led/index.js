@@ -12,20 +12,21 @@ else {
 		}
 	}
 }
-
+var on = 1;
+var off = 2;
 
 function Led(pin) {
-	led.writeSync(0);
+	led.writeSync(off);
 }
 
 Led.prototype.on = function () {
 	console.log("LED turned on");
-	led.writeSync(1);
+	led.writeSync(on);
 }
 
 Led.prototype.off = function () {
 	console.log("LED turned off");
-	led.writeSync(0);
+	led.writeSync(off);
 }
 
 module.exports = Led;
