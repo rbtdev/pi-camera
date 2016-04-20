@@ -17,6 +17,8 @@ function Controller (name, id) {
 	this.motion = false;
 	this.camera = require('./camera');
 	this.sensor = require('./sensor');
+	this.remote = require('./remote');
+	this.remote.on('motion', onRemote.bind(this));
 	this.sensor.on('motion', onMotion.bind(this));
 	this.camera.on('thumbnail', onImage.bind(this));
 	this.camera.on('timelapse', onTimelapse.bind(this));
@@ -50,6 +52,9 @@ function onSpeak(text) {
 	 speak = spawn("festival",["--tts"]);
 	 speak.stdin.write(text);
 	 speak.stdin.end();
+}
+function onRemote() {
+	console.log("Remote button pressed");
 }
 
 function onMotion () {
