@@ -47,9 +47,11 @@ function onDisconnect() {
 }
 
 function onSpeak(text) {
-	var command = "echo '" + text + "' | festival --tts"
-	console.log("Sending exex command: " + command);
-	Exec(command);
+	fs.writeFile('voicetext.txt', text, function (err) {
+  		if (err) return console.log(err);
+  		console.log("wrote " + text + " to file");
+  		Exec("festival --tts < voicetext.txt");
+	});
 }
 
 function onMotion () {
