@@ -9,37 +9,16 @@ if (env.PRODUCTION) {
 	var button = new Gpio(25, 'in', 'both');
 }
 else {
-	function Detector () {
-		this.watch = function (cb) {
-			this.cb = cb;
-		};
-
-		this.set = function (value) {
-			this.cb(null, value);
-		}
-	}
-
-
-	var button = new Detector();
-
-	console.log("Using simulated GPIO");
-	function detectMotion() {
-		console.log("Simulating motion");
-		detector.set(1);
-		setTimeout(function () {
-			detector.set(0)
-		}, 30*1000);
-	}
-	setInterval(detectMotion,60*1000)
 }
 
 function Remote() {
-	button.watch(detectorChanged.bind(this));
+	button.watch(buttonChanged.bind(this));
 	EventEmitter.call(this);
 }
 util.inherits(Remote, EventEmitter);
 
 function buttonChanged (err, value) {
+	console.log("Button value = " + value);
 	if (value === 1) {
 		console.log("Button pressed.");
 		this.emit('press');

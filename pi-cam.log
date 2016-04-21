@@ -1,7 +1,5 @@
 LED turned off
 Using physical GPIO
+Using physical GPIO
 Connecting to https://pi-control.herokuapp.com/camera
 Camera connected, registering My Pi
-Motion detected.
-Sensor inactive, not reporting motion.
-Sensor reset

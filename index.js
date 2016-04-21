@@ -19,7 +19,6 @@ function Controller (name, id) {
 	this.sensor = require('./sensor');
 	this.remote = require('./remote');
 	this.remote.on('press', onRemotePress.bind(this));
-	this.remote.on('release', onRemoteRelease.bind(this));
 	this.sensor.on('motion', onMotion.bind(this));
 	this.camera.on('thumbnail', onImage.bind(this));
 	this.camera.on('timelapse', onTimelapse.bind(this));
@@ -56,9 +55,12 @@ function onSpeak(text) {
 }
 function onRemotePress() {
 	console.log("Remote button pressed");
-}
-function onRemoteRelease() {
-	console.log("Remote putton released");
+	if (this.status === 'active') {
+		onDeactivate.bind(this)();
+	}
+	else {
+		onActivate.bind(this)();
+	}
 }
 
 function onMotion () {
