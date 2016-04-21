@@ -6,33 +6,27 @@ var env = require('../config');
 if (env.PRODUCTION) {
 	console.log("Using physical GPIO");
 	var Gpio = require('onoff').Gpio;
-	var buttons = [
-		{label: "A", gpio: new Gpio(25, 'in', 'both')}
-	];
+	var button = new Gpio(25, 'in', 'both')
 }
 else {
 }
 
 function Remote() {
-	buttons.forEach(function (button) {
-		button.gpio.watch(buttonChanged(button.label).bind(this));
-	})
+	button.watch(buttonChanged.bind(this));
 	EventEmitter.call(this);
 }
 util.inherits(Remote, EventEmitter);
 
-function buttonChanged (buttonLabel) {
-	return function (err, value) {
-		console.log("Button " + buttonLabel + " = " + value);
+function buttonChanged (err, value) {
+		console.log("Button = " + value);
 		if (value === 1) {
 			console.log("pressed.");
-			this.emit('press', buttonLabel);
+			this.emit('press', "D");
 		}
 		else {
 			console.log("released.");
-			this.emit('release', buttonLabel)
+			this.emit('release', "D")
 		}
-	}
 };
 
 var remote = new Remote();
