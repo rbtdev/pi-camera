@@ -14,28 +14,32 @@ else {
 }
 
 function Remote() {
-	buttons.forEach(function (button) {
-		button.gpio.watch(buttonChanged(button.label).bind(this));
-	})
-
 	EventEmitter.call(this);
 }
 util.inherits(Remote, EventEmitter);
 
-function buttonChanged (button) { 
+Remote.prototype.init = function () {
+	buttons.forEach(function (button) {
+		button.gpio.watch(this.buttonChanged(button.label));
+	})
+}
+
+Remote.prototype.buttonChanged = function (button) { 
+	var _this = this;
 	return function (err, value) {
 		console.log("Button " + button + " = " + value);
 		if (value === 1) {
 			console.log("pressed.");
-			this.emit('press', button);
+			_this.emit('press', button);
 		}
 		else {
 			console.log("released.");
-			this.emit('release', button)
+			_this.emit('release', button)
 		}
 	}
 };
 
 var remote = new Remote();
+remote.init();
 
 module.exports = remote;
