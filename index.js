@@ -53,15 +53,6 @@ function onSpeak(text) {
 	 speak.stdin.write(text);
 	 speak.stdin.end();
 }
-function onRemotePress() {
-	console.log("Remote button pressed");
-	if (this.status === 'active') {
-		onDeactivate.bind(this)();
-	}
-	else {
-		onActivate.bind(this)();
-	}
-}
 
 function onMotion () {
 	if (!this.motion) {
@@ -129,6 +120,18 @@ function onTimelapse(data) {
 			});
 		});
 	});
+}
+
+function onRemotePress(buttonLabel) {
+	console.log("Remote button " + buttonLabel + " pressed");
+	if (buttonLabel === "D") {
+		if (this.status === 'active') {
+			onDeactivate.bind(this)();
+		}
+		else {
+			onActivate.bind(this)();
+		}
+	}
 }
 
 function onActivate () {
