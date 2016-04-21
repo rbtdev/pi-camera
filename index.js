@@ -138,6 +138,7 @@ function onActivate () {
 	console.log("PiSim: Turning motion detection system on");
 	this.sensor.activate();
 	this.status = 'active';
+	onSpeak("system activated")
 	this.cloud.emit('status', {status: this.status});
 }
 
@@ -145,6 +146,7 @@ function onDeactivate () {
 	console.log("PiSim: Turning motion detection system off");
 	this.sensor.deactivate();
 	this.status = 'disabled';
+	onSpeak('System deactivated')
 	this.cloud.emit('status', {status: this.status});
 }
 
