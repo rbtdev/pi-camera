@@ -18,7 +18,8 @@ function Controller (name, id) {
 	this.camera = require('./camera');
 	this.sensor = require('./sensor');
 	this.remote = require('./remote');
-	this.remote.on('motion', onRemote.bind(this));
+	this.remote.on('press', onRemotePress.bind(this));
+	this.remote.on('release', onRemoteRelease.bind(this));
 	this.sensor.on('motion', onMotion.bind(this));
 	this.camera.on('thumbnail', onImage.bind(this));
 	this.camera.on('timelapse', onTimelapse.bind(this));
@@ -53,8 +54,11 @@ function onSpeak(text) {
 	 speak.stdin.write(text);
 	 speak.stdin.end();
 }
-function onRemote() {
+function onRemotePress() {
 	console.log("Remote button pressed");
+}
+function onRemoteRelease() {
+	console.log("Remote putton released");
 }
 
 function onMotion () {

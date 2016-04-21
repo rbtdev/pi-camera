@@ -6,7 +6,7 @@ var env = require('../config');
 if (env.PRODUCTION) {
 	console.log("Using physical GPIO");
 	var Gpio = require('onoff').Gpio;
-	var detector = new Gpio(25, 'in', 'both');
+	var button = new Gpio(25, 'in', 'both');
 }
 else {
 	function Detector () {
@@ -20,7 +20,7 @@ else {
 	}
 
 
-	var detector = new Detector();
+	var button = new Detector();
 
 	console.log("Using simulated GPIO");
 	function detectMotion() {
@@ -33,42 +33,26 @@ else {
 	setInterval(detectMotion,60*1000)
 }
 
-function Sensor() {
-	this.active = false;
-	detector.watch(detectorChanged.bind(this));
+function Remote() {
+	button.watch(detectorChanged.bind(this));
 	EventEmitter.call(this);
 }
-util.inherits(Sensor, EventEmitter);
+util.inherits(Remote, EventEmitter);
 
-function detectorChanged (err, value) {
+function buttonChanged (err, value) {
 	if (value === 1) {
-		console.log("Motion detected.");
-		if (this.active) {
-			this.emit('motion');
-		}
-		else {
-			console.log("Sensor inactive, not reporting motion.")
-		}
+		console.log("Button pressed.");
+		this.emit('press');
 	}
 	else {
-		console.log("Sensor reset");
+		console.log("Button released.");
+		this.emit('release')
 	}
 };
 
-Sensor.prototype.activate = function () {
-	console.log("Sensor on.");
-	this.active = true;
-}
-
-Sensor.prototype.deactivate = function () {
-	console.log("Sensor off.");
-	this.active = false;
-;
-}
-
-var sensor = new Sensor();
+var remote = new Remote();
 
 
 
 
-module.exports = sensor;
+module.exports = remote;
