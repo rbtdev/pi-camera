@@ -19,8 +19,9 @@ function Remote() {
 util.inherits(Remote, EventEmitter);
 
 Remote.prototype.init = function () {
+	var _this = this;
 	buttons.forEach(function (button) {
-		button.gpio.watch(this.buttonChanged(button.label));
+		button.gpio.watch(_this.buttonChanged(button.label));
 	})
 }
 
