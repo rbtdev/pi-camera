@@ -11,6 +11,14 @@ if (env.PRODUCTION) {
 	]
 }
 else {
+	var Gpio = {
+		watch: function (cb) {
+			setTimeout(function () {cb(null, 1)}, 5000);
+		}
+	}
+	var buttons = [
+		{label: "D", gpio: Gpio}
+	]
 }
 
 function Remote() {

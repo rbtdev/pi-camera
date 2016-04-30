@@ -7,6 +7,7 @@ var path = require('path');
 var Sound = require('node-aplay');
 var spawn  = require('child_process').spawn;
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
+var env = require('./config');
 
 function Controller (name, id) {
 
@@ -52,6 +53,10 @@ function onSpeak(text) {
 	 speak = spawn("festival",["--tts"]);
 	 speak.stdin.write(text);
 	 speak.stdin.end();
+	 speak.on('error', function (err) {
+	 	console.log("Error sending " + text + " to synth.");
+	 })
+	
 }
 
 function onMotion () {
