@@ -44,9 +44,9 @@ function onConnect () {
 function onDisconnect() {
 	console.log("Controller disconnected. Clearing event listeners.");
 	this.cloud.removeAllListeners("activate");
-	this.cloud.removeAllListeners('activate');
 	this.cloud.removeAllListeners('deactivate');
 	this.cloud.removeAllListeners('disconnect');
+	this.cloud.removeAllListeners('speak');
 }
 
 function onSpeak(text) {
