@@ -5,11 +5,11 @@ var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
 var Sound = require('node-aplay');
-var spawn  = require('child_process').spawn;
+var spawn = require('child_process').spawn;
 var alarm = new Sound(__dirname + "/sounds/alarm-voice.wav");
 var env = require('./config');
 
-function Controller (name, id) {
+function Controller(name, id) {
 
 	this.status = 'disabled';
 	this.cloud = null;
@@ -31,55 +31,62 @@ Controller.prototype.connect = function () {
 	this.cloud.on('connect', onConnect.bind(this))
 };
 
-function onConnect () {
+function onConnect() {
 	this.cloud.on('activate', onActivate.bind(this));
 	this.cloud.on('deactivate', onDeactivate.bind(this));
 	this.cloud.on('disconnect', onDisconnect.bind(this));
 	this.cloud.on('speak', onSpeak.bind(this));
 	console.log("Camera connected, registering " + this.name);
-	this.cloud.emit('register', {name: this.name, id:this.id})
-	this.cloud.emit('status', {status: this.status});	
+	this.cloud.emit('register', {
+		name: this.name,
+		id: this.id
+	})
+	this.cloud.emit('status', {
+		status: this.status
+	});
 };
 
 function onDisconnect() {
 	console.log("Controller disconnected. Clearing event listeners.");
 	this.cloud.removeAllListeners("activate");
-	this.cloud.removeAllListeners('activate');
 	this.cloud.removeAllListeners('deactivate');
 	this.cloud.removeAllListeners('disconnect');
+	this.cloud.removeAllListeners('speak');
 }
 
 function onSpeak(text) {
-	 speak = spawn("festival",["--tts"]);
-	 speak.stdin.write(text);
-	 speak.stdin.end();
-	 speak.on('error', function (err) {
-	 	console.log("Error sending " + text + " to synth.");
-	 })
-	
+	speak = spawn("festival", ["--tts"]);
+	speak.stdin.write(text);
+	speak.stdin.end();
+	speak.on('error', function (err) {
+		console.log("Error sending " + text + " to synth.");
+	})
+
 }
 
-function onMotion () {
+function onMotion() {
 	if (!this.motion) {
 		console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
 		this.motion = true;
 		var timestamp = moment().format("YYYYMMDDHHmmss");
 
 		// notify cloud that we have motion;
-		this.cloud.emit("alarm", {type: "motion", timestamp: timestamp});
+		this.cloud.emit("alarm", {
+			type: "motion",
+			timestamp: timestamp
+		});
 
 		// Activate camera and play alarm
 		this.camera.startTimelapse(timestamp);
 
 		// Play Alarm
 		this.playAlarm(20);
-	}
-	else {
+	} else {
 		console.log("Capturing video. Ignoring any motion alarms.");
 	}
 };
 
-Controller.prototype.playAlarm = function  () {
+Controller.prototype.playAlarm = function () {
 	alarm.play();
 }
 
@@ -96,7 +103,10 @@ function sendFile(socket, event, timestamp, filePath, cb) {
 			cb();
 		});
 		fsStream.pipe(stream);
-		ioStream(socket).emit(event, stream, {timestamp: timestamp, name:fileName});
+		ioStream(socket).emit(event, stream, {
+			timestamp: timestamp,
+			name: fileName
+		});
 	});
 }
 
@@ -132,41 +142,44 @@ function onRemotePress(buttonLabel) {
 	if (buttonLabel === "D") {
 		if (this.status === 'active') {
 			onDeactivate.bind(this)();
-		}
-		else {
+		} else {
 			onActivate.bind(this)();
 		}
 	}
 }
 
-function onActivate () {
+function onActivate() {
 	console.log("PiSim: Turning motion detection system on");
 	this.sensor.activate();
 	this.status = 'active';
 	onSpeak("system activated")
-	this.cloud.emit('status', {status: this.status});
+	this.cloud.emit('status', {
+		status: this.status
+	});
 }
 
-function onDeactivate () {
+function onDeactivate() {
 	console.log("PiSim: Turning motion detection system off");
 	this.sensor.deactivate();
 	this.status = 'disabled';
 	onSpeak('System deactivated')
-	this.cloud.emit('status', {status: this.status});
+	this.cloud.emit('status', {
+		status: this.status
+	});
 }
 
 function removeDirRecursive(path) {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
-        removeDirRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
+	if (fs.existsSync(path)) {
+		fs.readdirSync(path).forEach(function (file, index) {
+			var curPath = path + "/" + file;
+			if (fs.lstatSync(curPath).isDirectory()) { // recurse
+				removeDirRecursive(curPath);
+			} else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
 }
 
 var controller = new Controller(env.NAME, env.GUID)
