@@ -36,6 +36,7 @@ function onConnect() {
 	this.cloud.on('deactivate', onDeactivate.bind(this));
 	this.cloud.on('disconnect', onDisconnect.bind(this));
 	this.cloud.on('speak', onSpeak.bind(this));
+	this.cloud.on('capture', onMotion.bind(this))
 	console.log("Camera connected, registering " + this.name);
 	this.cloud.emit('register', {
 		name: this.name,
@@ -52,6 +53,7 @@ function onDisconnect() {
 	this.cloud.removeAllListeners('deactivate');
 	this.cloud.removeAllListeners('disconnect');
 	this.cloud.removeAllListeners('speak');
+	this.cloud.removeAllListeners('capture');
 }
 
 function onSpeak(text) {
@@ -61,7 +63,6 @@ function onSpeak(text) {
 	speak.on('error', function (err) {
 		console.log("Error sending " + text + " to synth.");
 	})
-
 }
 
 function onMotion() {
