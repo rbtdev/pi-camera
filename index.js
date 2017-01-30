@@ -36,7 +36,7 @@ function onConnect() {
 	this.cloud.on('deactivate', onDeactivate.bind(this));
 	this.cloud.on('disconnect', onDisconnect.bind(this));
 	this.cloud.on('speak', onSpeak.bind(this));
-	this.cloud.on('capture', onMotion.bind(this))
+	this.cloud.on('capture', onCapture.bind(this))
 	console.log("Camera connected, registering " + this.name);
 	this.cloud.emit('register', {
 		name: this.name,
@@ -57,12 +57,18 @@ function onDisconnect() {
 }
 
 function onSpeak(text) {
+	console.log("Sending speak text: " + text); 
 	speak = spawn("festival", ["--tts"]);
 	speak.stdin.write(text);
 	speak.stdin.end();
 	speak.on('error', function (err) {
 		console.log("Error sending " + text + " to synth.");
 	})
+}
+
+function onCapture() {
+    console.log("Got capture event from cloud, starting capture");
+    onMotion.bind(this)();
 }
 
 function onMotion() {
