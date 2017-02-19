@@ -69,7 +69,7 @@ function onMotion() {
 	if (!this.motion) {
 		console.log("Motion detected by sensor. Sending motion event to cloud and starting camera");
 		this.motion = true;
-		var timestamp = moment().format("YYYYMMDDHHmmss");
+		var timestamp = Date.now();
 
 		// notify cloud that we have motion;
 		this.cloud.emit("alarm", {
